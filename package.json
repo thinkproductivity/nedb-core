@@ -22,19 +22,19 @@
   },
   "dependencies": {
     "async": "latest",
-    "binary-search-tree": "latest",
+    "is": "latest",
     "localforage": "latest",
     "mkdirp": "latest",
-    "underscore": "latest",
-    "is": "latest"
+    "nedb-binary-search-tree": "latest",
+    "underscore": "latest"
   },
   "devDependencies": {
     "chai": "latest",
+    "commander": "latest",
+    "exec-time": "latest",
     "mocha": "latest",
     "request": "latest",
-    "sinon": "latest",
-    "exec-time": "latest",
-    "commander": "latest"
+    "sinon": "latest"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec --timeout 10000"
