@@ -5,3 +5,4 @@ test
 test_lac
 .idea
 workspace
+*.log
