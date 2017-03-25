@@ -25,7 +25,6 @@
     "events": "^1.1.1",
     "inherits": "^2.0.3",
     "is": "latest",
-    "localforage": "latest",
     "lodash": "^4.17.4",
     "mkdirp": "latest"
   },
@@ -41,8 +40,5 @@
     "test": "mocha --reporter spec --timeout 10000"
   },
   "main": "index",
-  "browser": {
-    "./lib/storage.js": "./browser/storage.js"
-  },
   "license": "SEE LICENSE IN LICENSE"
 }
