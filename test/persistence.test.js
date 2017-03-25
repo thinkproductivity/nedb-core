@@ -9,7 +9,7 @@ var should = require('chai').should()
   , customUtils = require('../lib/custom-utils')
   , Datastore = require('../lib/datastore')
   , Persistence = require('../lib/persistence')
-  , storage = require('../lib/storage')
+  , storage = require('../nodejs/storage')
   , child_process = require('child_process')
 ;
 
