@@ -8,6 +8,7 @@ var should = require('chai').should()
   , model = require('../lib/model')
   , Datastore = require('../lib/datastore')
   , Persistence = require('../lib/persistence')
+  , storage = require('./storage')
   ;
 
 
@@ -131,7 +132,7 @@ describe('Executor', function () {
     var d;
 
     beforeEach(function (done) {
-      d = new Datastore({ filename: testDb });
+      d = new Datastore({ filename: testDb, storage });
       d.filename.should.equal(testDb);
       d.inMemoryOnly.should.equal(false);
 

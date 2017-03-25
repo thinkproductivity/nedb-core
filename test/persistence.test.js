@@ -9,7 +9,7 @@ var should = require('chai').should()
   , customUtils = require('../lib/custom-utils')
   , Datastore = require('../lib/datastore')
   , Persistence = require('../lib/persistence')
-  , storage = require('../nodejs/storage')
+  , storage = require('./storage')
   , child_process = require('child_process')
 ;
 
@@ -18,7 +18,7 @@ describe('Persistence', function () {
   var d;
 
   beforeEach(function (done) {
-    d = new Datastore({ filename: testDb });
+    d = new Datastore({ filename: testDb, storage });
     d.filename.should.equal(testDb);
     d.inMemoryOnly.should.equal(false);
 
@@ -277,18 +277,18 @@ describe('Persistence', function () {
     fs.writeFileSync(corruptTestFilename, fakeData, "utf8");
 
     // Default corruptAlertThreshold
-    d = new Datastore({ filename: corruptTestFilename });
+    d = new Datastore({ filename: corruptTestFilename, storage });
     d.loadDatabase(function (err) {
       assert.isDefined(err);
       assert.isNotNull(err);
 
       fs.writeFileSync(corruptTestFilename, fakeData, "utf8");
-      d = new Datastore({ filename: corruptTestFilename, corruptAlertThreshold: 1 });
+      d = new Datastore({ filename: corruptTestFilename, corruptAlertThreshold: 1, storage });
       d.loadDatabase(function (err) {
         assert.isNull(err);
 
         fs.writeFileSync(corruptTestFilename, fakeData, "utf8");
-        d = new Datastore({ filename: corruptTestFilename, corruptAlertThreshold: 0 });
+        d = new Datastore({ filename: corruptTestFilename, corruptAlertThreshold: 0, storage });
         d.loadDatabase(function (err) {
           assert.isDefined(err);
           assert.isNotNull(err);
@@ -319,8 +319,11 @@ describe('Persistence', function () {
         fs.writeFileSync(hookTestFilename, "Some content", "utf8");
 
         (function () {
-          new Datastore({ filename: hookTestFilename, autoload: true
-                        , afterSerialization: as
+          new Datastore({
+            filename: hookTestFilename,
+            autoload: true,
+            storage,
+            afterSerialization: as
           });
         }).should.throw();
 
@@ -328,8 +331,11 @@ describe('Persistence', function () {
         fs.readFileSync(hookTestFilename, "utf8").should.equal("Some content");
 
         (function () {
-          new Datastore({ filename: hookTestFilename, autoload: true
-                        , beforeDeserialization: bd
+          new Datastore({
+            filename: hookTestFilename,
+            autoload: true,
+            storage,
+            beforeDeserialization: bd
           });
         }).should.throw();
 
@@ -346,9 +352,12 @@ describe('Persistence', function () {
         fs.writeFileSync(hookTestFilename, "Some content", "utf8");
 
         (function () {
-          new Datastore({ filename: hookTestFilename, autoload: true
-                        , afterSerialization: as
-                        , beforeDeserialization: function (s) { return s; }
+          new Datastore({
+            filename: hookTestFilename,
+            autoload: true,
+            storage,
+            afterSerialization: as,
+            beforeDeserialization: function (s) { return s; }
           });
         }).should.throw();
 
@@ -362,7 +371,10 @@ describe('Persistence', function () {
     it("A serialization hook can be used to transform data before writing new state to disk", function (done) {
       var hookTestFilename = 'workspace/hookTest.db'
       storage.ensureFileDoesntExist(hookTestFilename, function () {
-        var d = new Datastore({ filename: hookTestFilename, autoload: true
+        var d = new Datastore({
+          filename: hookTestFilename
+          , storage
+          , autoload: true
           , afterSerialization: as
           , beforeDeserialization: bd
         })
@@ -441,9 +453,12 @@ describe('Persistence', function () {
     it("Use serialization hook when persisting cached database or compacting", function (done) {
       var hookTestFilename = 'workspace/hookTest.db'
       storage.ensureFileDoesntExist(hookTestFilename, function () {
-        var d = new Datastore({ filename: hookTestFilename, autoload: true
-          , afterSerialization: as
-          , beforeDeserialization: bd
+        var d = new Datastore({
+          filename: hookTestFilename,
+          storage,
+          autoload: true,
+          afterSerialization: as,
+          beforeDeserialization: bd
         })
         ;
 
@@ -503,7 +518,10 @@ describe('Persistence', function () {
     it("Deserialization hook is correctly used when loading data", function (done) {
       var hookTestFilename = 'workspace/hookTest.db'
       storage.ensureFileDoesntExist(hookTestFilename, function () {
-        var d = new Datastore({ filename: hookTestFilename, autoload: true
+        var d = new Datastore({
+          filename: hookTestFilename
+          , storage
+          , autoload: true
           , afterSerialization: as
           , beforeDeserialization: bd
         })
@@ -522,9 +540,11 @@ describe('Persistence', function () {
                   data.length.should.equal(6);
 
                   // Everything is deserialized correctly, including deletes and indexes
-                  var d = new Datastore({ filename: hookTestFilename
-                    , afterSerialization: as
-                    , beforeDeserialization: bd
+                  var d = new Datastore({
+                    filename: hookTestFilename,
+                    storage,
+                    afterSerialization: as,
+                    beforeDeserialization: bd
                   })
                   ;
                   d.loadDatabase(function () {
@@ -556,11 +576,11 @@ describe('Persistence', function () {
     })
 
     it('Creating a persistent datastore with a bad filename will cause an error', function () {
-      (function () { new Datastore({ filename: 'workspace/bad.db~' }); }).should.throw();
+      (function () { new Datastore({ filename: 'workspace/bad.db~', storage }); }).should.throw();
     })
 
     it('If no file exists, ensureDatafileIntegrity creates an empty datafile', function (done) {
-      var p = new Persistence({ db: { inMemoryOnly: false, filename: 'workspace/it.db' } });
+      var p = new Persistence({ db: { inMemoryOnly: false, filename: 'workspace/it.db', storage } });
 
       if (fs.existsSync('workspace/it.db')) { fs.unlinkSync('workspace/it.db'); }
       if (fs.existsSync('workspace/it.db~')) { fs.unlinkSync('workspace/it.db~'); }
@@ -581,7 +601,7 @@ describe('Persistence', function () {
     });
 
     it('If only datafile exists, ensureDatafileIntegrity will use it', function (done) {
-      var p = new Persistence({ db: { inMemoryOnly: false, filename: 'workspace/it.db' } });
+      var p = new Persistence({ db: { inMemoryOnly: false, filename: 'workspace/it.db', storage } });
 
       if (fs.existsSync('workspace/it.db')) { fs.unlinkSync('workspace/it.db'); }
       if (fs.existsSync('workspace/it.db~')) { fs.unlinkSync('workspace/it.db~'); }
@@ -604,7 +624,7 @@ describe('Persistence', function () {
     });
 
     it('If temp datafile exists and datafile doesnt, ensureDatafileIntegrity will use it (cannot happen except upon first use)', function (done) {
-      var p = new Persistence({ db: { inMemoryOnly: false, filename: 'workspace/it.db' } });
+      var p = new Persistence({ db: { inMemoryOnly: false, filename: 'workspace/it.db', storage } });
 
       if (fs.existsSync('workspace/it.db')) { fs.unlinkSync('workspace/it.db'); }
       if (fs.existsSync('workspace/it.db~')) { fs.unlinkSync('workspace/it.db~~'); }
@@ -628,7 +648,7 @@ describe('Persistence', function () {
 
     // Technically it could also mean the write was successful but the rename wasn't, but there is in any case no guarantee that the data in the temp file is whole so we have to discard the whole file
     it('If both temp and current datafiles exist, ensureDatafileIntegrity will use the datafile, as it means that the write of the temp file failed', function (done) {
-      var theDb = new Datastore({ filename: 'workspace/it.db' });
+      var theDb = new Datastore({ filename: 'workspace/it.db', storage });
 
       if (fs.existsSync('workspace/it.db')) { fs.unlinkSync('workspace/it.db'); }
       if (fs.existsSync('workspace/it.db~')) { fs.unlinkSync('workspace/it.db~'); }
@@ -744,7 +764,7 @@ describe('Persistence', function () {
       if (fs.existsSync(dbFile)) { fs.unlinkSync(dbFile); }
       if (fs.existsSync(dbFile + '~')) { fs.unlinkSync(dbFile + '~'); }
 
-      theDb = new Datastore({ filename: dbFile });
+      theDb = new Datastore({ filename: dbFile, storage });
 
       theDb.loadDatabase(function (err) {
         var contents = fs.readFileSync(dbFile, 'utf8');
@@ -765,7 +785,7 @@ describe('Persistence', function () {
           async.apply(storage.ensureFileDoesntExist, dbFile)
         , async.apply(storage.ensureFileDoesntExist, dbFile + '~')
         , function (cb) {
-          theDb = new Datastore({ filename: dbFile });
+          theDb = new Datastore({ filename: dbFile, storage });
           theDb.loadDatabase(cb);
         }
         , function (cb) {
@@ -813,7 +833,7 @@ describe('Persistence', function () {
         return cb();
       }
       , function (cb) {
-        theDb2 = new Datastore({ filename: dbFile });
+        theDb2 = new Datastore({ filename: dbFile, storage });
         theDb2.loadDatabase(cb);
       }
       , function (cb) {   // No change in second db
@@ -860,7 +880,7 @@ describe('Persistence', function () {
         fs.readFileSync('workspace/lac.db~', 'utf8').length.should.equal(5000);
 
         // Reload database without a crash, check that no data was lost and fs state is clean (no temp file)
-        var db = new Datastore({ filename: 'workspace/lac.db' });
+        var db = new Datastore({ filename: 'workspace/lac.db', storage });
         db.loadDatabase(function (err) {
           assert.isNull(err);
 

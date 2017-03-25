@@ -9,6 +9,7 @@ var should = require('chai').should()
   , Datastore = require('../lib/datastore')
   , Persistence = require('../lib/persistence')
   , Cursor = require('../lib/cursor')
+  , storage = require('./storage')
   ;
 
 
@@ -16,7 +17,7 @@ describe('Cursor', function () {
   var d;
 
   beforeEach(function (done) {
-    d = new Datastore({ filename: testDb });
+    d = new Datastore({ filename: testDb, storage });
     d.filename.should.equal(testDb);
     d.inMemoryOnly.should.equal(false);
 

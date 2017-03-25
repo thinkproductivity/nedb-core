@@ -2,7 +2,8 @@ var fs = require('fs')
   , child_process = require('child_process')
   , async = require('async')
   , Nedb = require('../lib/datastore')
-  , db = new Nedb({ filename: './workspace/openfds.db', autoload: true })
+  , storage = require('../test/storage')
+  , db = new Nedb({ filename: './workspace/openfds.db', autoload: true, storage })
   , N = 64   // Half the allowed file descriptors
   , i, fds
   ;

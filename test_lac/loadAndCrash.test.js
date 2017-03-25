@@ -2,6 +2,7 @@
  * Load and modify part of fs to ensure writeFile will crash after writing 5000 bytes
  */
 var fs = require('fs');
+var storage = require('../test/storage');
 
 function rethrow() {
   // Only enable in debug mode. A backtrace uses ~1000 bytes of heap space and
@@ -117,7 +118,7 @@ fs.writeFile = function(path, data, options, callback_) {
 
 // End of fs modification
 var Nedb = require('../lib/datastore.js')
-  , db = new Nedb({ filename: 'workspace/lac.db' })
+  , db = new Nedb({ filename: 'workspace/lac.db', storage })
   ;
 
 db.loadDatabase();
