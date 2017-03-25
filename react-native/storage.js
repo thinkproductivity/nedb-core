@@ -17,7 +17,8 @@
 
 var fs = require('react-native-fs')
   , async = require('async')
-  , path = require('./path')
+  , customUtils = require('../lib/custom-utils')
+  , path = customUtils.path;
   , storage = {}
   ;
 
