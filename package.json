@@ -21,19 +21,19 @@
     "url": "git@github.com:nedb3/nedb3.git"
   },
   "dependencies": {
-    "async": "latest",
-    "is": "latest",
-    "localforage": "latest",
+    "async": "^2.6.3",
+    "is": "^3.3.0",
+    "localforage": "^1.7.3",
     "mkdirp": "^0.5.1",
-    "underscore": "latest"
+    "underscore": "^1.9.1"
   },
   "devDependencies": {
-    "chai": "latest",
-    "commander": "latest",
-    "exec-time": "latest",
-    "mocha": "latest",
-    "request": "latest",
-    "sinon": "latest"
+    "chai": "^4.2.0",
+    "commander": "^4.1.0",
+    "exec-time": "^0.0.4",
+    "mocha": "^7.0.1",
+    "request": "^2.88.0",
+    "sinon": "^8.1.1"
   },
   "scripts": {
     "test": "mocha --reporter spec --timeout 10000"
